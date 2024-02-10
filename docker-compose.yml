@@ -1,0 +1,67 @@
+version: '3'
+services:
+  web:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./projetos:/var/www/html
+      - ./docker/nigix/sites:/etc/nginx/conf.d
+    networks:
+      - projetos_network
+
+  php:
+    image: php:8.2-fpm
+    container_name: php
+    restart: always
+    volumes:
+      - ./projetos:/var/www/html
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+    environment:
+      PHP_INI_SCAN_DIR: /usr/local/etc/php/conf.d
+    networks:
+      - projetos_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - projetos_network
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root92024161
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: laravel_password
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - projetos_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    networks:
+      - projetos_network
+
+networks:
+  projetos_network:
+    driver: bridge
